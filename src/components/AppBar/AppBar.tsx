@@ -4,7 +4,7 @@ import { AppBar as MUIAppBar, Box, Container, Link, Toolbar, Typography } from '
 export default function AppBar() {
   return (
     <>
-      <MUIAppBar position="relative">
+      <MUIAppBar>
         <Container maxWidth="xl">
           <Toolbar>
             <Link href="/" sx={{ marginBottom: 0.25, marginTop: 0.75, marginRight: 4 }}>
@@ -21,6 +21,8 @@ export default function AppBar() {
           </Toolbar>
         </Container>
       </MUIAppBar>
+      {/* Add spacer to push content below the app bar (since it's absolute positioned) */}
+      <Box sx={{ height: 75 }} />
     </>
   );
 }
