@@ -23,23 +23,7 @@ import fetchCurrentSeason from '../../network/fetchCurrentSeason';
 import { RosterItem, Team, Season, PositionType } from '../../types';
 import getTeamLogoUrl from '../../utils/getTeamLogoUrl';
 import getHeadshotUrl from '../../utils/getHeadshotUrl';
-
-function TeamHeaderView({ team }: { team?: Team }): React.ReactElement {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  return (
-    <Grid container direction="column" alignItems="center">
-      <Box component="img" alt="Team Logo" src={getTeamLogoUrl(team?.id ?? '')} sx={{ width: 125, height: 125 }} />
-      <Typography variant={isMobile ? 'h4' : 'h2'} textAlign="center">
-        {team?.name}
-      </Typography>
-      <Typography variant={isMobile ? 'subtitle1' : 'h5'} textAlign="center">
-        {team?.conference?.name} Conference - {team?.division?.name} Division
-      </Typography>
-    </Grid>
-  );
-}
+import ProfileHeader from '../../components/ProfileHeader/ProfileHeader';
 
 function RosterTable({ items, team, season }: { items: RosterItem[]; team: Team; season: Season }): React.ReactElement {
   const theme = useTheme();
@@ -144,37 +128,43 @@ function TeamPage(): React.ReactElement {
 
   return (
     <Container sx={{ paddingY: 3 }}>
-      <Paper sx={{ padding: 3 }}>
-        <TeamHeaderView team={team} />
-      </Paper>
       {team && season && (
-        <Paper sx={{ padding: 2, marginTop: 4 }}>
-          <Typography variant="h4">Current Roster</Typography>
-          {defense && (
-            <Box>
-              <Typography variant="h5" sx={{ marginTop: 4 }}>
-                Defense
-              </Typography>
-              <RosterTable items={defense} team={team} season={season} />
-            </Box>
-          )}
-          {forwards && (
-            <Box>
-              <Typography variant="h5" sx={{ marginTop: 4 }}>
-                Forwards
-              </Typography>
-              <RosterTable items={forwards} team={team} season={season} />
-            </Box>
-          )}
-          {goalies && (
-            <Box>
-              <Typography variant="h5" sx={{ marginTop: 4 }}>
-                Goalies
-              </Typography>
-              <RosterTable items={goalies} team={team} season={season} />
-            </Box>
-          )}
-        </Paper>
+        <>
+          <Paper sx={{ padding: 3 }}>
+            <ProfileHeader
+              title={team.name}
+              subtitle={`${team?.conference?.name} Conference - ${team?.division?.name} Division`}
+              imageUrl={getTeamLogoUrl(team?.id ?? '')}
+            />
+          </Paper>
+          <Paper sx={{ padding: 2, marginTop: 4 }}>
+            <Typography variant="h4">Current Roster</Typography>
+            {defense && (
+              <Box>
+                <Typography variant="h5" sx={{ marginTop: 4 }}>
+                  Defense
+                </Typography>
+                <RosterTable items={defense} team={team} season={season} />
+              </Box>
+            )}
+            {forwards && (
+              <Box>
+                <Typography variant="h5" sx={{ marginTop: 4 }}>
+                  Forwards
+                </Typography>
+                <RosterTable items={forwards} team={team} season={season} />
+              </Box>
+            )}
+            {goalies && (
+              <Box>
+                <Typography variant="h5" sx={{ marginTop: 4 }}>
+                  Goalies
+                </Typography>
+                <RosterTable items={goalies} team={team} season={season} />
+              </Box>
+            )}
+          </Paper>
+        </>
       )}
     </Container>
   );
