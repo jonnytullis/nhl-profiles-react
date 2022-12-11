@@ -14,11 +14,11 @@ function getRoutes() {
     },
     {
       Component: React.lazy(() => import('./pages/Team/Team')),
-      path: '/team',
+      path: '/team/:id',
     },
     {
       Component: React.lazy(() => import('./pages/Player/Player')),
-      path: '/player',
+      path: '/player/:id',
     },
     {
       Component: React.lazy(() => import('./pages/NotFound/NotFound')),
