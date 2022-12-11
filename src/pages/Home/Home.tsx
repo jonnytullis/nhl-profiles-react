@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { Box, Container, Grid, Paper, Typography, Link, Divider } from '@mui/material';
 import useNetwork from '../../hooks/useNetwork';
 import fetchTeams from '../../network/fetchTeams';
-import { Team } from '../../interfaces';
+import { Team } from '../../types';
 import getTeamLogoUrl from '../../utils/getTeamLogoUrl';
 
 type Division = {
@@ -69,7 +69,7 @@ function ConferenceView({ conference }: { conference: Conference }): React.React
   );
 }
 
-export default function Home(): React.ReactElement {
+function Home(): React.ReactElement {
   const [executeFetchTeams, { data: teamsData }] = useNetwork<Record<'teams', Team[]>>(fetchTeams);
 
   useEffect(() => {
@@ -119,3 +119,5 @@ export default function Home(): React.ReactElement {
     </Container>
   );
 }
+
+export default Home;

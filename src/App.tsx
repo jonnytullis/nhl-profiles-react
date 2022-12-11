@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import ErrorBoundary from './ErrorBoundary';
-import { ThemeProvider } from '@emotion/react';
+import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppBar } from './components';
