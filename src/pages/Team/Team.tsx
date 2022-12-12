@@ -93,9 +93,14 @@ function RosterTable({ items, team, season }: { items: RosterItem[]; team: Team;
 function TeamPage(): React.ReactElement {
   const { id } = useParams();
   const raiseAlert = useAlert();
-  const [executeFetchTeam, { data: teamData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(fetchTeam);
-  const [executeFetchSeason, { data: seasonData, error: seasonError }] =
-    useNetwork<Record<'seasons', Season[]>>(fetchCurrentSeason);
+  const [executeFetchTeam, { data: teamData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(
+    'teams_request',
+    fetchTeam
+  );
+  const [executeFetchSeason, { data: seasonData, error: seasonError }] = useNetwork<Record<'seasons', Season[]>>(
+    'seasons_request',
+    fetchCurrentSeason
+  );
   const team = teamData?.teams?.[0];
   const season = seasonData?.seasons?.[0];
 

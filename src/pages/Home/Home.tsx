@@ -71,7 +71,10 @@ function ConferenceView({ conference }: { conference: Conference }): React.React
 }
 
 function Home(): React.ReactElement {
-  const [executeFetchTeams, { data: teamsData, error }] = useNetwork<Record<'teams', Team[]>>(fetchTeams);
+  const [executeFetchTeams, { data: teamsData, error }] = useNetwork<Record<'teams', Team[]>>(
+    'teams_request',
+    fetchTeams
+  );
   const raiseAlert = useAlert();
 
   useEffect(() => {

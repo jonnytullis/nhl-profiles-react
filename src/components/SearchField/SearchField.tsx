@@ -48,9 +48,15 @@ export default function SearchField(): React.ReactElement {
   const raiseAlert = useAlert();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const popperOpen = Boolean(anchorEl);
-  const [executeFetchTeams, { data: teamsData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(fetchTeams);
-  const [executeFetchSeason, { data: seasonData, error: seasonError }] =
-    useNetwork<Record<'seasons', Season[]>>(fetchCurrentSeason);
+
+  const [executeFetchTeams, { data: teamsData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(
+    'teams_request',
+    fetchTeams
+  );
+  const [executeFetchSeason, { data: seasonData, error: seasonError }] = useNetwork<Record<'seasons', Season[]>>(
+    'seasons_request',
+    fetchCurrentSeason
+  );
   const [options, setOptions] = useState<Option[]>([]);
   const [inputValue, setInputValue] = useState('');
 

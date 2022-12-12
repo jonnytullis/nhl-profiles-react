@@ -4,6 +4,7 @@ import { AxiosError, AxiosResponse } from 'axios';
 type NetworkRequest = (p?: any) => Promise<AxiosResponse>;
 
 export default function useNetwork<T>(
+  requestKey: string,
   requestMethod: NetworkRequest
 ): [(p?: any) => Promise<T | AxiosError>, { data: T | null; error: AxiosError | null; loading: boolean }] {
   const [data, setData] = useState<T | null>(null);

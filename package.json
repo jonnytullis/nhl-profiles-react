@@ -1,6 +1,7 @@
 {
   "name": "sportradar-front-end-exercise",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "start": "react-scripts start",

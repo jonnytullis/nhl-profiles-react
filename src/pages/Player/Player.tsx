@@ -68,11 +68,18 @@ function PlayerInfoTable({ player }: { player: Person }): React.ReactElement {
 function Player(): React.ReactElement {
   const { id } = useParams();
   const raiseAlert = useAlert();
-  const [executeFetchPlayer, { data: personData, error: personError }] =
-    useNetwork<Record<'people', Person[]>>(fetchPlayer);
-  const [executeFetchTeam, { data: teamData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(fetchTeam);
-  const [executeFetchSeason, { data: seasonData, error: seasonError }] =
-    useNetwork<Record<'seasons', Season[]>>(fetchCurrentSeason);
+  const [executeFetchPlayer, { data: personData, error: personError }] = useNetwork<Record<'people', Person[]>>(
+    'players_request',
+    fetchPlayer
+  );
+  const [executeFetchTeam, { data: teamData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(
+    'teams_request',
+    fetchTeam
+  );
+  const [executeFetchSeason, { data: seasonData, error: seasonError }] = useNetwork<Record<'seasons', Season[]>>(
+    'seasons_request',
+    fetchCurrentSeason
+  );
 
   const player = personData?.people?.[0];
   const team = teamData?.teams?.[0];
