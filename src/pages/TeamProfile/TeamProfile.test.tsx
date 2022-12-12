@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import TeamPage from './Team';
+import TeamProfile from './TeamProfile';
 import useNetwork from '../../hooks/useNetwork';
 import useAlert from '../../hooks/useAlert';
 import { useParams } from 'react-router-dom';
@@ -58,7 +58,7 @@ it('fetches team data with teamId param', async () => {
     return [jest.fn(), {}];
   });
 
-  await render(<TeamPage />);
+  await render(<TeamProfile />);
 
   expect(fetchTeam).toHaveBeenCalledTimes(1);
   expect(fetchTeam).toHaveBeenCalledWith(expect.objectContaining({ teamId: '123' }));
@@ -78,7 +78,7 @@ it('renders team and roster data from network request', async () => {
     return [jest.fn(), {}];
   });
 
-  await render(<TeamPage />);
+  await render(<TeamProfile />);
 
   expect(screen.queryByText(/mattress cats/i)).toBeInTheDocument();
 
@@ -105,7 +105,7 @@ it('raises error when fetching team', async () => {
     return [jest.fn(), {}];
   });
 
-  await render(<TeamPage />);
+  await render(<TeamProfile />);
 
   expect(raiseAlert).toHaveBeenCalledTimes(1);
   expect(raiseAlert).toHaveBeenCalledWith(
@@ -129,7 +129,7 @@ it('raises error when fetching season', async () => {
     return [jest.fn(), {}];
   });
 
-  await render(<TeamPage />);
+  await render(<TeamProfile />);
 
   expect(raiseAlert).toHaveBeenCalledTimes(1);
   expect(raiseAlert).toHaveBeenCalledWith(

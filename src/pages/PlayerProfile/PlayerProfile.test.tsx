@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Player from './Player';
+import PlayerProfile from './PlayerProfile';
 import useNetwork from '../../hooks/useNetwork';
 import useAlert from '../../hooks/useAlert';
 import { useParams } from 'react-router-dom';
@@ -43,7 +43,7 @@ it('fetches player, team, and season data', async () => {
     return [jest.fn(), {}];
   });
 
-  await render(<Player />);
+  await render(<PlayerProfile />);
 
   expect(fetchPlayer).toHaveBeenCalledTimes(1);
   expect(fetchTeam).toHaveBeenCalledTimes(1);
@@ -67,7 +67,7 @@ it('renders all player data', async () => {
     return [jest.fn(), {}];
   });
 
-  await render(<Player />);
+  await render(<PlayerProfile />);
 
   expect(screen.queryByText(/Team_Name/i)).toBeInTheDocument();
   expect(screen.queryByText(mockPlayer.currentAge)).toBeInTheDocument();
@@ -86,7 +86,7 @@ it('raises alert if errors occur', async () => {
   (useParams as jest.Mock).mockReturnValue({ id: '123' });
   (useNetwork as jest.Mock).mockReturnValue([jest.fn(), { error: new Error() }]);
 
-  await render(<Player />);
+  await render(<PlayerProfile />);
 
   expect(raiseAlert).toHaveBeenCalled();
   expect(raiseAlert).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }));

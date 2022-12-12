@@ -65,7 +65,7 @@ function PlayerInfoTable({ player }: { player: Person }): React.ReactElement {
   );
 }
 
-function Player(): React.ReactElement {
+function PlayerProfile(): React.ReactElement {
   const { id } = useParams();
   const raiseAlert = useAlert();
   const [executeFetchPlayer, { data: personData, error: personError }] = useNetwork<Record<'people', Person[]>>(
@@ -152,4 +152,4 @@ function Player(): React.ReactElement {
   );
 }
 
-export default Player;
+export default PlayerProfile;

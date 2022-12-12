@@ -90,7 +90,7 @@ function RosterTable({ items, team, season }: { items: RosterItem[]; team: Team;
   );
 }
 
-function TeamPage(): React.ReactElement {
+function TeamProfile(): React.ReactElement {
   const { id } = useParams();
   const raiseAlert = useAlert();
   const [executeFetchTeam, { data: teamData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(
@@ -191,4 +191,4 @@ function TeamPage(): React.ReactElement {
   );
 }
 
-export default TeamPage;
+export default TeamProfile;
