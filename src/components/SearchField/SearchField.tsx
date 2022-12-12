@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   TextField,
   IconButton,
@@ -57,7 +57,6 @@ export default function SearchField(): React.ReactElement {
     'seasons_request',
     fetchCurrentSeason
   );
-  const [options, setOptions] = useState<Option[]>([]);
   const [inputValue, setInputValue] = useState('');
 
   const handleClick = useCallback(
@@ -84,11 +83,12 @@ export default function SearchField(): React.ReactElement {
     setInputValue('');
   };
 
-  const assembleOptions = useCallback(() => {
+  const options: Option[] = useMemo(() => {
+    const newOptions: Option[] = [];
+
     if (teamsData && seasonData) {
       const seasonId = seasonData.seasons?.[0]?.seasonId;
       const teams = teamsData.teams ?? [];
-      const newOptions: Option[] = [];
 
       teams.forEach((team) => {
         newOptions.push({
@@ -108,14 +108,10 @@ export default function SearchField(): React.ReactElement {
           });
         });
       });
-
-      setOptions(newOptions);
     }
-  }, [seasonData, teamsData]);
 
-  useEffect(() => {
-    assembleOptions();
-  }, [assembleOptions]);
+    return newOptions;
+  }, [seasonData, teamsData]);
 
   function filterOptions(optionList: Option[], params: FilterOptionsState<Option>) {
     const firstFilter = createFilterOptions({

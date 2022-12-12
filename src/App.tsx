@@ -4,7 +4,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AlertProvider } from './contexts/AlertContext';
-import { AppBar } from './components';
+import AppBar from './components/AppBar/AppBar';
 import theme from './theme';
 
 function getRoutes() {
