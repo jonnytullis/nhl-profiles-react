@@ -1,7 +1,11 @@
 # NHL Profile App
-I built this app for the SportRadar front-end exercise.
+I built this app for the SportRadar front-end exercise. It includes the following features:
+* Dashboard to browse NHL teams organized by Conference/Division
+* Team profile page (can deep-link)
+* Player profile page (can deep-link)
+* Client-side search for teams and players
 
-## Tools
+## Pre-requisites
 In order to run this app, you must have the following tools installed:
 * Node (v16.18.1)
 * NPM (8.19.2)
@@ -13,11 +17,10 @@ Run `npm install`
 ## Start the App
 Run `npm start`
 
-## Automated Tests
-Run `npm run test`
-
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 The page will reload if you make edits.\
 You will also see any lint errors in the console.
+## Automated Tests
+Run `npm run test`
