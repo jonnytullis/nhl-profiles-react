@@ -3,6 +3,7 @@ import ErrorBoundary from './ErrorBoundary';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AlertProvider } from './contexts/AlertContext';
 import { AppBar } from './components';
 import theme from './theme';
 
@@ -41,10 +42,12 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <AppBar />
-        <BrowserRouter>
-          <Routes>{getRoutes()}</Routes>
-        </BrowserRouter>
+        <AlertProvider>
+          <AppBar />
+          <BrowserRouter>
+            <Routes>{getRoutes()}</Routes>
+          </BrowserRouter>
+        </AlertProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

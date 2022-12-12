@@ -61,7 +61,7 @@ function ConferenceView({ conference }: { conference: Conference }): React.React
     <>
       <Typography variant="h4">{conference.conferenceName} Conference</Typography>
       <Grid item container>
-        {divisionsList.map((division, i) => (
+        {divisionsList.map((division) => (
           <DivisionView key={division.divisionName} division={division} />
         ))}
       </Grid>
