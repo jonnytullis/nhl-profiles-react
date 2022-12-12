@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppBar as MUIAppBar, Box, Container, Link, Toolbar, Typography } from '@mui/material';
+import SearchField from '../SearchField/SearchField';
 
 export default function AppBar() {
   return (
@@ -15,9 +16,10 @@ export default function AppBar() {
                 sx={{ height: 60, width: 60 }}
               />
             </Link>
-            <Typography variant="h6" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }}>
+            <Typography variant="h6" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block', flexGrow: 1 } }}>
               National Hockey League
             </Typography>
+            <SearchField />
           </Toolbar>
         </Container>
       </MUIAppBar>

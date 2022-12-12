@@ -11,7 +11,7 @@ export default function useNetwork<T>(
   const [error, setError] = useState<AxiosError | null>(null);
 
   const execute: (p?: any) => Promise<T | AxiosError> = useCallback(
-    async (p: any) => {
+    async (p?: any) => {
       setLoading(true);
       let result: T | AxiosError;
 

@@ -47,15 +47,17 @@ function PlayerInfoTable({ player }: { player: Person }): React.ReactElement {
         </TableRow>
       </TableHead>
       <TableBody>
-        <TableCell>{player.currentAge}</TableCell>
-        <TableCell>{player.height}</TableCell>
-        <TableCell>{player.weight}</TableCell>
-        <TableCell>{player.primaryNumber}</TableCell>
-        <TableCell>{player.primaryPosition?.name}</TableCell>
-        <TableCell>{player.shootsCatches}</TableCell>
-        <TableCell>{player.nationality}</TableCell>
-        <TableCell>{getYesNoText(player.captain)}</TableCell>
-        <TableCell>{getYesNoText(player.rookie)}</TableCell>
+        <TableRow>
+          <TableCell>{player.currentAge}</TableCell>
+          <TableCell>{player.height}</TableCell>
+          <TableCell>{player.weight}</TableCell>
+          <TableCell>{player.primaryNumber}</TableCell>
+          <TableCell>{player.primaryPosition?.name}</TableCell>
+          <TableCell>{player.shootsCatches}</TableCell>
+          <TableCell>{player.nationality}</TableCell>
+          <TableCell>{getYesNoText(player.captain)}</TableCell>
+          <TableCell>{getYesNoText(player.rookie)}</TableCell>
+        </TableRow>
       </TableBody>
     </Table>
   );
