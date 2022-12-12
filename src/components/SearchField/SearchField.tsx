@@ -18,6 +18,7 @@ import { useTheme } from '@mui/material';
 import fetchTeams from '../../network/fetchTeams';
 import fetchCurrentSeason from '../../network/fetchCurrentSeason';
 import useNetwork from '../../hooks/useNetwork';
+import useAlert from '../../hooks/useAlert';
 import { Team, Season } from '../../types';
 import getTeamLogoUrl from '../../utils/getTeamLogoUrl';
 import getHeadshotUrl from '../../utils/getHeadshotUrl';
@@ -44,10 +45,12 @@ function SearchResultItem({ option }: { option: Option }): React.ReactElement {
 
 export default function SearchField(): React.ReactElement {
   const theme = useTheme();
+  const raiseAlert = useAlert();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const popperOpen = Boolean(anchorEl);
-  const [executeFetchTeams, { data: teamsData }] = useNetwork<Record<'teams', Team[]>>(fetchTeams);
-  const [executeFetchSeason, { data: seasonData }] = useNetwork<Record<'seasons', Season[]>>(fetchCurrentSeason);
+  const [executeFetchTeams, { data: teamsData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(fetchTeams);
+  const [executeFetchSeason, { data: seasonData, error: seasonError }] =
+    useNetwork<Record<'seasons', Season[]>>(fetchCurrentSeason);
   const [options, setOptions] = useState<Option[]>([]);
   const [inputValue, setInputValue] = useState('');
 
@@ -63,6 +66,12 @@ export default function SearchField(): React.ReactElement {
     },
     [executeFetchTeams, teamsData, executeFetchSeason, seasonData]
   );
+
+  useEffect(() => {
+    if (teamError || seasonError) {
+      raiseAlert({ message: 'Failed to fetch data for search', severity: 'error' });
+    }
+  }, [teamError, seasonError, raiseAlert]);
 
   const handleClose = () => {
     setAnchorEl(null);

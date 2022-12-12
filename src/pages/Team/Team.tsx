@@ -18,6 +18,7 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { useParams } from 'react-router-dom';
 import useNetwork from '../../hooks/useNetwork';
+import useAlert from '../../hooks/useAlert';
 import fetchTeam from '../../network/fetchTeam';
 import fetchCurrentSeason from '../../network/fetchCurrentSeason';
 import { RosterItem, Team, Season, PositionType } from '../../types';
@@ -91,8 +92,10 @@ function RosterTable({ items, team, season }: { items: RosterItem[]; team: Team;
 
 function TeamPage(): React.ReactElement {
   const { id } = useParams();
-  const [executeFetchTeam, { data: teamData }] = useNetwork<Record<'teams', Team[]>>(fetchTeam);
-  const [executeFetchSeason, { data: seasonData }] = useNetwork<Record<'seasons', Season[]>>(fetchCurrentSeason);
+  const raiseAlert = useAlert();
+  const [executeFetchTeam, { data: teamData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(fetchTeam);
+  const [executeFetchSeason, { data: seasonData, error: seasonError }] =
+    useNetwork<Record<'seasons', Season[]>>(fetchCurrentSeason);
   const team = teamData?.teams?.[0];
   const season = seasonData?.seasons?.[0];
 
@@ -115,6 +118,19 @@ function TeamPage(): React.ReactElement {
 
     return { defense: defenseItems, forwards: forwardItems, goalies: goalieItems };
   }, [team]);
+
+  useEffect(() => {
+    let message;
+    if (teamError) {
+      message = 'Failed to fetch team info';
+    } else if (seasonError) {
+      message = 'Failed to fetch season info';
+    }
+
+    if (message) {
+      raiseAlert({ message, severity: 'error' });
+    }
+  }, [raiseAlert, seasonError, teamError]);
 
   useEffect(() => {
     if (id) {

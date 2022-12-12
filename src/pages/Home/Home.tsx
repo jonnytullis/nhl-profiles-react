@@ -4,6 +4,7 @@ import useNetwork from '../../hooks/useNetwork';
 import fetchTeams from '../../network/fetchTeams';
 import { Team } from '../../types';
 import getTeamLogoUrl from '../../utils/getTeamLogoUrl';
+import useAlert from '../../hooks/useAlert';
 
 type Division = {
   divisionName: string;
@@ -70,7 +71,14 @@ function ConferenceView({ conference }: { conference: Conference }): React.React
 }
 
 function Home(): React.ReactElement {
-  const [executeFetchTeams, { data: teamsData }] = useNetwork<Record<'teams', Team[]>>(fetchTeams);
+  const [executeFetchTeams, { data: teamsData, error }] = useNetwork<Record<'teams', Team[]>>(fetchTeams);
+  const raiseAlert = useAlert();
+
+  useEffect(() => {
+    if (error) {
+      raiseAlert({ message: 'Failed to fetch NHL teams', severity: 'error' });
+    }
+  }, [error, raiseAlert]);
 
   useEffect(() => {
     executeFetchTeams();

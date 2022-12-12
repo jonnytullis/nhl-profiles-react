@@ -11,11 +11,13 @@ import {
   Paper,
   Grid,
   Typography,
+  Link,
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useTheme } from '@mui/material';
 import ProfileHeader from '../../components/ProfileHeader/ProfileHeader';
 import useNetwork from '../../hooks/useNetwork';
+import useAlert from '../../hooks/useAlert';
 import fetchPlayer from '../../network/fetchPlayer';
 import fetchTeam from '../../network/fetchTeam';
 import fetchCurrentSeason from '../../network/fetchCurrentSeason';
@@ -65,13 +67,31 @@ function PlayerInfoTable({ player }: { player: Person }): React.ReactElement {
 
 function Player(): React.ReactElement {
   const { id } = useParams();
-  const [executeFetchPlayer, { data: personData }] = useNetwork<Record<'people', Person[]>>(fetchPlayer);
-  const [executeFetchTeam, { data: teamData }] = useNetwork<Record<'teams', Team[]>>(fetchTeam);
-  const [executeFetchSeason, { data: seasonData }] = useNetwork<Record<'seasons', Season[]>>(fetchCurrentSeason);
+  const raiseAlert = useAlert();
+  const [executeFetchPlayer, { data: personData, error: personError }] =
+    useNetwork<Record<'people', Person[]>>(fetchPlayer);
+  const [executeFetchTeam, { data: teamData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(fetchTeam);
+  const [executeFetchSeason, { data: seasonData, error: seasonError }] =
+    useNetwork<Record<'seasons', Season[]>>(fetchCurrentSeason);
 
   const player = personData?.people?.[0];
   const team = teamData?.teams?.[0];
   const season = seasonData?.seasons?.[0];
+
+  useEffect(() => {
+    let message;
+    if (personError) {
+      message = 'Failed to fetch player info';
+    } else if (teamError) {
+      message = 'Failed to fetch team info';
+    } else if (seasonError) {
+      message = 'Failed to fetch season info';
+    }
+
+    if (message) {
+      raiseAlert({ message, severity: 'error' });
+    }
+  }, [personError, raiseAlert, seasonError, teamError]);
 
   useEffect(() => {
     executeFetchSeason();
@@ -100,17 +120,19 @@ function Player(): React.ReactElement {
               title={player.fullName}
               roundImage
               subtitle={
-                <Grid container alignItems="center" columnSpacing={2}>
-                  <Grid item>
-                    <Box component="img" alt="Team Logo" src={getTeamLogoUrl(team.id)} sx={{ height: 50, width: 50 }} />
+                <Link href={`/team/${team.id}`}>
+                  <Grid container alignItems="center" columnSpacing={2}>
+                    <Grid item>
+                      <Box
+                        component="img"
+                        alt="Team Logo"
+                        src={getTeamLogoUrl(team.id)}
+                        sx={{ height: 50, width: 50 }}
+                      />
+                    </Grid>
+                    <Grid item>{team.name}</Grid>
                   </Grid>
-                  <Grid item>
-                    {team.name}
-                    {player.primaryPosition && (
-                      <Typography sx={{ fontStyle: 'italic' }}>{player.primaryPosition.name}</Typography>
-                    )}
-                  </Grid>
-                </Grid>
+                </Link>
               }
             />
           </Paper>
