@@ -1,5 +1,5 @@
 # NHL Profile App
-I built this app for the SportRadar front-end exercise. It includes the following features:
+I built this app for the SportRadar front-end exercise (see the provided [document](sportradar-spec.md)). It includes the following features:
 * Dashboard to browse NHL teams organized by Conference/Division
 * Team profile page (can deep-link)
 * Player profile page (can deep-link)
