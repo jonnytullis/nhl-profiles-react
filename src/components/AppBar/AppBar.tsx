@@ -1,5 +1,6 @@
 import React from 'react';
-import { AppBar as MUIAppBar, Box, Container, Link, Toolbar, Typography } from '@mui/material';
+import { AppBar as MUIAppBar, Box, Container, Link, Toolbar, Typography, IconButton } from '@mui/material';
+import { GitHub } from '@mui/icons-material';
 import SearchField from '../SearchField/SearchField';
 
 export default function AppBar() {
@@ -20,6 +21,14 @@ export default function AppBar() {
               National Hockey League
             </Typography>
             <SearchField />
+            <IconButton
+              color="secondary"
+              size="large"
+              href="https://github.com/jonnytullis/nhl-profiles-react"
+              target="_blank"
+            >
+              <GitHub />
+            </IconButton>
           </Toolbar>
         </Container>
       </MUIAppBar>
