@@ -1,3 +1,5 @@
+View application at https://nhl.jonnytullis.com/
+
 # NHL Profile App
 I built this app for the SportRadar front-end exercise (see the provided [document](sportradar-spec.md)). It includes the following features:
 * Dashboard to browse NHL teams organized by Conference/Division
