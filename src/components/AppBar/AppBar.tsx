@@ -17,9 +17,10 @@ export default function AppBar() {
                 sx={{ height: 60, width: 60 }}
               />
             </Link>
-            <Typography variant="h6" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block', flexGrow: 1 } }}>
+            <Typography variant="h6" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }}>
               National Hockey League
             </Typography>
+            <Box sx={{ flexGrow: 1 }} />
             <SearchField />
             <IconButton
               color="secondary"
