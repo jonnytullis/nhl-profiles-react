@@ -73,7 +73,7 @@ function PlayerProfile(): React.ReactElement {
     enabled: !!id,
   });
   const { data: team, error: teamError } = useQuery({
-    queryKey: ['team_query', id],
+    queryKey: ['team_query', String(player?.currentTeam?.id)],
     queryFn: () => fetchTeam({ teamId: String(player?.currentTeam?.id) ?? '' }),
     enabled: !!player?.currentTeam?.id,
   });
