@@ -1,10 +1,12 @@
 import React, { Suspense } from 'react';
-import ErrorBoundary from './ErrorBoundary';
 import { ThemeProvider } from '@mui/material/styles';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { CssBaseline } from '@mui/material';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AlertProvider } from './contexts/AlertContext';
 import AppBar from './components/AppBar/AppBar';
+import ErrorBoundary from './ErrorBoundary';
+import queryClient from './network/queryClient';
 import theme from './theme';
 
 function getRoutes() {
@@ -43,10 +45,12 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AlertProvider>
-          <AppBar />
-          <BrowserRouter>
-            <Routes>{getRoutes()}</Routes>
-          </BrowserRouter>
+          <QueryClientProvider client={queryClient}>
+            <AppBar />
+            <BrowserRouter>
+              <Routes>{getRoutes()}</Routes>
+            </BrowserRouter>
+          </QueryClientProvider>
         </AlertProvider>
       </ThemeProvider>
     </ErrorBoundary>
