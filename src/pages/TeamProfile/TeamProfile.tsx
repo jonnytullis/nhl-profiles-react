@@ -13,11 +13,11 @@ import {
   TableHead,
   Avatar,
   Card,
-  Link,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
+import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import useNetwork from '../../hooks/useNetwork';
 import useAlert from '../../hooks/useAlert';
 import fetchTeam from '../../network/fetchTeam';
 import fetchCurrentSeason from '../../network/fetchCurrentSeason';
@@ -37,7 +37,7 @@ function RosterTable({ items, team, season }: { items: RosterItem[]; team: Team;
     return {
       id: item.person.id,
       player: (
-        <Link href={href}>
+        <Link to={href}>
           <Grid container direction={isMobile ? 'column' : 'row'} alignItems="center" columnSpacing={2}>
             <Grid item>
               <Avatar
@@ -93,16 +93,15 @@ function RosterTable({ items, team, season }: { items: RosterItem[]; team: Team;
 function TeamProfile(): React.ReactElement {
   const { id } = useParams();
   const raiseAlert = useAlert();
-  const [executeFetchTeam, { data: teamData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(
-    'teams_request',
-    fetchTeam
-  );
-  const [executeFetchSeason, { data: seasonData, error: seasonError }] = useNetwork<Record<'seasons', Season[]>>(
-    'seasons_request',
-    fetchCurrentSeason
-  );
-  const team = teamData?.teams?.[0];
-  const season = seasonData?.seasons?.[0];
+  const { data: team, error: teamError } = useQuery({
+    queryKey: ['team_query', id],
+    queryFn: () => fetchTeam({ teamId: id ?? '' }),
+    enabled: !!id,
+  });
+  const { data: season, error: seasonError } = useQuery({
+    queryKey: ['current_season'],
+    queryFn: fetchCurrentSeason,
+  });
 
   const { defense, forwards, goalies } = useMemo(() => {
     const defenseItems: RosterItem[] = [];
@@ -136,16 +135,6 @@ function TeamProfile(): React.ReactElement {
       raiseAlert({ message, severity: 'error' });
     }
   }, [raiseAlert, seasonError, teamError]);
-
-  useEffect(() => {
-    if (id) {
-      executeFetchTeam({ teamId: id });
-    }
-  }, [executeFetchTeam, id]);
-
-  useEffect(() => {
-    executeFetchSeason();
-  }, [executeFetchSeason]);
 
   return (
     <Container sx={{ paddingY: 3 }}>

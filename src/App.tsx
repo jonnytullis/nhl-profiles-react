@@ -46,8 +46,8 @@ function App() {
         <CssBaseline />
         <AlertProvider>
           <QueryClientProvider client={queryClient}>
-            <AppBar />
             <BrowserRouter>
+              <AppBar />
               <Routes>{getRoutes()}</Routes>
             </BrowserRouter>
           </QueryClientProvider>

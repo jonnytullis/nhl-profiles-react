@@ -1,5 +1,6 @@
 import React from 'react';
-import { AppBar as MUIAppBar, Box, Container, Link, Toolbar, Typography, IconButton } from '@mui/material';
+import { AppBar as MUIAppBar, Box, Container, Toolbar, Typography, IconButton } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { GitHub } from '@mui/icons-material';
 import SearchField from '../SearchField/SearchField';
 
@@ -9,14 +10,16 @@ export default function AppBar() {
       <MUIAppBar>
         <Container maxWidth="xl">
           <Toolbar>
-            <Link href="/" sx={{ marginBottom: 0.25, marginTop: 0.75, marginRight: 4 }}>
-              <Box
-                component="img"
-                alt="NHL Logo"
-                src="https://www-league.nhlstatic.com/images/logos/league-dark/133-flat.svg"
-                sx={{ height: 60, width: 60 }}
-              />
-            </Link>
+            <Box sx={{ marginBottom: 0.25, marginTop: 0.75, marginRight: 4 }}>
+              <Link to="/">
+                <Box
+                  component="img"
+                  alt="NHL Logo"
+                  src="https://www-league.nhlstatic.com/images/logos/league-dark/133-flat.svg"
+                  sx={{ height: 60, width: 60 }}
+                />
+              </Link>
+            </Box>
             <Typography variant="h6" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }}>
               National Hockey League
             </Typography>

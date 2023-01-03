@@ -10,13 +10,12 @@ import {
   TableCell,
   Paper,
   Grid,
-  Typography,
-  Link,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { useTheme } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import ProfileHeader from '../../components/ProfileHeader/ProfileHeader';
-import useNetwork from '../../hooks/useNetwork';
 import useAlert from '../../hooks/useAlert';
 import fetchPlayer from '../../network/fetchPlayer';
 import fetchTeam from '../../network/fetchTeam';
@@ -24,7 +23,7 @@ import fetchCurrentSeason from '../../network/fetchCurrentSeason';
 import getHeadshotUrl from '../../utils/getHeadshotUrl';
 import getTeamLogoUrl from '../../utils/getTeamLogoUrl';
 import getYesNoText from '../../utils/getYesNoText';
-import { Person, Team, Season } from '../../types';
+import { Person } from '../../types';
 
 function PlayerInfoTable({ player }: { player: Person }): React.ReactElement {
   const theme = useTheme();
@@ -68,26 +67,24 @@ function PlayerInfoTable({ player }: { player: Person }): React.ReactElement {
 function PlayerProfile(): React.ReactElement {
   const { id } = useParams();
   const raiseAlert = useAlert();
-  const [executeFetchPlayer, { data: personData, error: personError }] = useNetwork<Record<'people', Person[]>>(
-    'players_request',
-    fetchPlayer
-  );
-  const [executeFetchTeam, { data: teamData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(
-    'teams_request',
-    fetchTeam
-  );
-  const [executeFetchSeason, { data: seasonData, error: seasonError }] = useNetwork<Record<'seasons', Season[]>>(
-    'seasons_request',
-    fetchCurrentSeason
-  );
-
-  const player = personData?.people?.[0];
-  const team = teamData?.teams?.[0];
-  const season = seasonData?.seasons?.[0];
+  const { data: player, error: playerError } = useQuery({
+    queryKey: ['player_query', id],
+    queryFn: () => fetchPlayer({ playerId: id ?? '' }),
+    enabled: !!id,
+  });
+  const { data: team, error: teamError } = useQuery({
+    queryKey: ['team_query', id],
+    queryFn: () => fetchTeam({ teamId: String(player?.currentTeam?.id) ?? '' }),
+    enabled: !!player?.currentTeam?.id,
+  });
+  const { data: season, error: seasonError } = useQuery({
+    queryKey: ['current_season'],
+    queryFn: fetchCurrentSeason,
+  });
 
   useEffect(() => {
     let message;
-    if (personError) {
+    if (playerError) {
       message = 'Failed to fetch player info';
     } else if (teamError) {
       message = 'Failed to fetch team info';
@@ -98,24 +95,7 @@ function PlayerProfile(): React.ReactElement {
     if (message) {
       raiseAlert({ message, severity: 'error' });
     }
-  }, [personError, raiseAlert, seasonError, teamError]);
-
-  useEffect(() => {
-    executeFetchSeason();
-  }, [executeFetchSeason]);
-
-  useEffect(() => {
-    if (id) {
-      executeFetchPlayer({ playerId: id });
-    }
-  }, [executeFetchPlayer, id]);
-
-  useEffect(() => {
-    if (personData) {
-      const teamId = personData.people?.[0]?.currentTeam?.id;
-      executeFetchTeam({ teamId });
-    }
-  }, [executeFetchTeam, personData]);
+  }, [playerError, raiseAlert, seasonError, teamError]);
 
   return (
     <Container sx={{ paddingY: 3 }}>
@@ -127,7 +107,7 @@ function PlayerProfile(): React.ReactElement {
               title={player.fullName}
               roundImage
               subtitle={
-                <Link href={`/team/${team.id}`}>
+                <Link to={`/team/${team.id}`}>
                   <Grid container alignItems="center" columnSpacing={2}>
                     <Grid item>
                       <Box

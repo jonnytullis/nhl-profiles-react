@@ -1,9 +1,8 @@
-import { AxiosResponse } from 'axios';
-import client from './client';
+import axiosClient from './axiosClient';
+import { Team } from '../types';
 
-export default async function fetchTeams({
-  withRosters = false,
-}: { withRosters?: boolean } = {}): Promise<AxiosResponse> {
+export default async function fetchTeams({ withRosters = false }: { withRosters?: boolean } = {}): Promise<Team[]> {
   const params = { expand: withRosters ? 'team.roster' : undefined };
-  return client.get('/teams', { params });
+  const result = await axiosClient.get('/teams', { params });
+  return result.data.teams;
 }
