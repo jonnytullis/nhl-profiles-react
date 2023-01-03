@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
+import { Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { CssBaseline } from '@mui/material';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -24,7 +25,7 @@ function getRoutes() {
       path: '/player/:id',
     },
     {
-      Component: React.lazy(() => import('./pages/NotFound/NotFound')),
+      Component: () => <Navigate to="/" />,
       path: '*',
     },
   ];
