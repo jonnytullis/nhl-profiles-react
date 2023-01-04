@@ -1,13 +1,14 @@
 import React from 'react';
-import { render, screen, act, waitFor } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { BrowserRouter } from 'react-router-dom';
+import { useQuery, QueryOptions } from '@tanstack/react-query';
 import SearchField from './SearchField';
-import useNetwork from '../../hooks/useNetwork';
 import useAlert from '../../hooks/useAlert';
 
+jest.mock('@tanstack/react-query');
 jest.mock('../../network/fetchTeams', () => () => null);
 jest.mock('../../network/fetchCurrentSeason', () => () => null);
-jest.mock('../../hooks/useNetwork');
 jest.mock('../../hooks/useAlert');
 
 const mockTeams = [
@@ -16,45 +17,43 @@ const mockTeams = [
   { id: 3, name: 'Pink Panthers', roster: { roster: [{ person: { id: 33, fullName: 'Mark Cheney' } }] } },
 ];
 
-it('fetches teams and current season on click', async () => {
-  const fetchTeams = jest.fn();
-  const fetchSeasons = jest.fn();
-  (useNetwork as jest.Mock).mockImplementation((key) => {
-    if (key === 'teams_request') {
-      return [fetchTeams, { data: null }];
-    } else if (key === 'seasons_request') {
-      return [fetchSeasons, { data: null }];
-    }
-    return [jest.fn(), {}];
-  });
+const setup = async () =>
+  render(
+    <BrowserRouter>
+      <SearchField />
+    </BrowserRouter>
+  );
 
-  await render(<SearchField />);
+beforeEach(() => {
+  (useQuery as jest.Mock).mockReturnValue({});
+});
 
-  expect(fetchTeams).toHaveBeenCalledTimes(0);
-  expect(fetchSeasons).toHaveBeenCalledTimes(0);
+it('renders search field on search button click', async () => {
+  await setup();
+
+  let textField = screen.queryByPlaceholderText(/search/i);
+  expect(textField).toBeNull();
 
   const button = screen.getByRole('button');
   await act(async () => {
     await userEvent.click(button);
   });
 
-  expect(fetchTeams).toHaveBeenCalledTimes(1);
-  expect(fetchSeasons).toHaveBeenCalledTimes(1);
+  textField = screen.queryByPlaceholderText(/search/i);
+  expect(textField).toBeDefined();
 });
 
 it('renders teams and players in search results from network requests', async () => {
-  const fetchTeams = jest.fn();
-  const fetchSeasons = jest.fn();
-  (useNetwork as jest.Mock).mockImplementation((key) => {
-    if (key === 'teams_request') {
-      return [fetchTeams, { data: { teams: mockTeams } }];
-    } else if (key === 'seasons_request') {
-      return [fetchSeasons, { data: { seasons: [{ seasonId: 44 }] } }];
+  (useQuery as jest.Mock).mockImplementation(({ queryKey }: QueryOptions) => {
+    if (queryKey?.includes('teams_with_rosters')) {
+      return { data: mockTeams };
     }
-    return [jest.fn(), {}];
+    if (queryKey?.includes('current_season')) {
+      return { data: { seasonId: 'season_id' } };
+    }
   });
 
-  await render(<SearchField />);
+  await setup();
 
   await act(async () => {
     const button = screen.getByRole('button');
@@ -66,43 +65,33 @@ it('renders teams and players in search results from network requests', async ()
     await userEvent.type(textField, 'ma');
   });
 
-  await waitFor(() => {
-    expect(screen.queryByText(/mark cheney/i)).toBeInTheDocument();
-    expect(screen.queryByText(/mattress cats/i)).toBeInTheDocument();
-    expect(screen.queryByText(/jason maj/i)).toBeInTheDocument();
-    expect(screen.queryByText(/jeremy carson/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/catalina corndogs/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/pink panthers/i)).not.toBeInTheDocument();
-  });
+  expect(screen.queryByText(/mark cheney/i)).toBeInTheDocument();
+  expect(screen.queryByText(/mattress cats/i)).toBeInTheDocument();
+  expect(screen.queryByText(/jason maj/i)).toBeInTheDocument();
+  expect(screen.queryByText(/jeremy carson/i)).not.toBeInTheDocument();
+  expect(screen.queryByText(/catalina corndogs/i)).not.toBeInTheDocument();
+  expect(screen.queryByText(/pink panthers/i)).not.toBeInTheDocument();
 });
 
 it('renders error message on network error', async () => {
-  const fetchTeams = jest.fn();
-  const fetchSeasons = jest.fn();
-  (useNetwork as jest.Mock).mockImplementation((key) => {
-    if (key === 'teams_request') {
-      return [fetchTeams, { error: new Error() }];
-    } else if (key === 'seasons_request') {
-      return [fetchSeasons, { data: null }];
+  (useQuery as jest.Mock).mockImplementation(({ queryKey }: QueryOptions) => {
+    if (queryKey?.includes('teams_with_rosters')) {
+      return { error: new Error() };
     }
-    return [jest.fn(), {}];
+    if (queryKey?.includes('current_season')) {
+      return { data: null };
+    }
   });
 
   const raiseAlert = jest.fn();
-  (useAlert as jest.Mock).mockReturnValue(raiseAlert);
+  (useAlert as jest.Mock).mockImplementation(() => raiseAlert);
 
-  await render(<SearchField />);
-
-  expect(fetchTeams).toHaveBeenCalledTimes(0);
-  expect(fetchSeasons).toHaveBeenCalledTimes(0);
+  await setup();
 
   const button = screen.getByRole('button');
   await act(async () => {
     await userEvent.click(button);
   });
-
-  expect(fetchTeams).toHaveBeenCalledTimes(1);
-  expect(fetchSeasons).toHaveBeenCalledTimes(1);
 
   expect(raiseAlert).toHaveBeenCalled();
   expect(raiseAlert).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }));

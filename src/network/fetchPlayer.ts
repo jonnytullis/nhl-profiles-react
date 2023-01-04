@@ -1,6 +1,7 @@
-import { AxiosResponse } from 'axios';
-import client from './client';
+import axiosClient from './axiosClient';
+import { Person } from '../types';
 
-export default async function fetchPlayer({ playerId }: { playerId: string }): Promise<AxiosResponse> {
-  return client.get(`/people/${playerId}`);
+export default async function fetchPlayer({ playerId }: { playerId: string }): Promise<Person> {
+  const result = await axiosClient.get(`/people/${playerId}`);
+  return result.data?.people?.[0];
 }

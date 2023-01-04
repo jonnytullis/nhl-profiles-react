@@ -12,14 +12,14 @@ import {
   ListItemButton,
   FilterOptionsState,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import { Search, Close } from '@mui/icons-material';
 import { useTheme } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import fetchTeams from '../../network/fetchTeams';
 import fetchCurrentSeason from '../../network/fetchCurrentSeason';
-import useNetwork from '../../hooks/useNetwork';
 import useAlert from '../../hooks/useAlert';
-import { Team, Season } from '../../types';
 import getTeamLogoUrl from '../../utils/getTeamLogoUrl';
 import getHeadshotUrl from '../../utils/getHeadshotUrl';
 
@@ -30,16 +30,18 @@ interface Option {
   href?: string;
 }
 
-function SearchResultItem({ option }: { option: Option }): React.ReactElement {
+function SearchResultItem({ option, onClick }: { option: Option; onClick: () => void }): React.ReactElement {
   return (
-    <ListItemButton href={option.href ?? ''} disabled={!option.href}>
-      {option.imageUrl && (
-        <ListItemAvatar>
-          <Box component="img" alt="Result Image" src={option.imageUrl} sx={{ width: 40, height: 40 }} />
-        </ListItemAvatar>
-      )}
-      <Typography>{option.text}</Typography>
-    </ListItemButton>
+    <Link to={option.href ?? ''}>
+      <ListItemButton disabled={!option.href} onClick={onClick}>
+        {option.imageUrl && (
+          <ListItemAvatar>
+            <Box component="img" alt="Result Image" src={option.imageUrl} sx={{ width: 40, height: 40 }} />
+          </ListItemAvatar>
+        )}
+        <Typography>{option.text}</Typography>
+      </ListItemButton>
+    </Link>
   );
 }
 
@@ -47,30 +49,24 @@ export default function SearchField(): React.ReactElement {
   const theme = useTheme();
   const raiseAlert = useAlert();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const popperOpen = Boolean(anchorEl);
+  const [popperOpen, setPopperOpen] = useState(false);
 
-  const [executeFetchTeams, { data: teamsData, error: teamError }] = useNetwork<Record<'teams', Team[]>>(
-    'teams_request',
-    fetchTeams
-  );
-  const [executeFetchSeason, { data: seasonData, error: seasonError }] = useNetwork<Record<'seasons', Season[]>>(
-    'seasons_request',
-    fetchCurrentSeason
-  );
+  const { data: teams, error: teamError } = useQuery({
+    queryKey: ['teams_with_rosters'],
+    queryFn: () => fetchTeams({ withRosters: true }),
+    enabled: popperOpen,
+  });
+  const { data: season, error: seasonError } = useQuery({
+    queryKey: ['current_season'],
+    queryFn: fetchCurrentSeason,
+    enabled: popperOpen,
+  });
   const [inputValue, setInputValue] = useState('');
 
-  const handleClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      setAnchorEl(event.currentTarget);
-      if (!teamsData) {
-        executeFetchTeams({ withRosters: true });
-      }
-      if (!seasonData) {
-        executeFetchSeason();
-      }
-    },
-    [executeFetchTeams, teamsData, executeFetchSeason, seasonData]
-  );
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+    setPopperOpen(true);
+  }, []);
 
   useEffect(() => {
     if (teamError || seasonError) {
@@ -79,16 +75,15 @@ export default function SearchField(): React.ReactElement {
   }, [teamError, seasonError, raiseAlert]);
 
   const handleClose = () => {
-    setAnchorEl(null);
+    setPopperOpen(false);
     setInputValue('');
   };
 
   const options: Option[] = useMemo(() => {
     const newOptions: Option[] = [];
 
-    if (teamsData && seasonData) {
-      const seasonId = seasonData.seasons?.[0]?.seasonId;
-      const teams = teamsData.teams ?? [];
+    if (teams && season) {
+      const seasonId = season.seasonId;
 
       teams.forEach((team) => {
         newOptions.push({
@@ -111,7 +106,7 @@ export default function SearchField(): React.ReactElement {
     }
 
     return newOptions;
-  }, [seasonData, teamsData]);
+  }, [season, teams]);
 
   function filterOptions(optionList: Option[], params: FilterOptionsState<Option>) {
     const firstFilter = createFilterOptions({
@@ -146,7 +141,9 @@ export default function SearchField(): React.ReactElement {
                   freeSolo
                   options={options}
                   renderInput={(params) => <TextField {...params} placeholder="Search" color="info" autoFocus />}
-                  renderOption={(props, option) => <SearchResultItem key={option.id} option={option} />}
+                  renderOption={(props, option) => (
+                    <SearchResultItem key={option.id} option={option} onClick={handleClose} />
+                  )}
                   getOptionLabel={(option) => (typeof option === 'string' ? option : option.text)}
                   filterOptions={filterOptions}
                   sx={{ width: 300, marginY: '-8px' }}

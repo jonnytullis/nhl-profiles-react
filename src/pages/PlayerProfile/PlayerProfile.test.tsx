@@ -1,16 +1,18 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { useQuery, QueryOptions } from '@tanstack/react-query';
 import PlayerProfile from './PlayerProfile';
-import useNetwork from '../../hooks/useNetwork';
 import useAlert from '../../hooks/useAlert';
-import { useParams } from 'react-router-dom';
 
+jest.mock('@tanstack/react-query');
 jest.mock('../../network/fetchTeam', () => () => null);
 jest.mock('../../network/fetchPlayer', () => () => null);
 jest.mock('../../network/fetchCurrentSeason', () => () => null);
-jest.mock('../../hooks/useNetwork');
 jest.mock('../../hooks/useAlert');
-jest.mock('react-router-dom');
+jest.mock('react-router-dom', () => ({
+  Link: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useParams: () => ({ id: '123' }),
+}));
 
 const mockPlayer = {
   captain: false,
@@ -27,64 +29,42 @@ const mockPlayer = {
   weight: 209,
 };
 
-it('fetches player, team, and season data', async () => {
-  (useParams as jest.Mock).mockReturnValue({ id: '123' });
-  const fetchTeam = jest.fn();
-  const fetchSeason = jest.fn();
-  const fetchPlayer = jest.fn();
-  (useNetwork as jest.Mock).mockImplementation((key) => {
-    if (key === 'teams_request') {
-      return [fetchTeam, { data: null }];
-    } else if (key === 'seasons_request') {
-      return [fetchSeason, { data: null }];
-    } else if (key === 'players_request') {
-      return [fetchPlayer, { data: { people: [{ currentTeam: { id: 22 } }] } }];
+const mockTeam = {
+  name: 'Team_Name',
+  id: 3,
+};
+
+it('renders player and team data', async () => {
+  (useQuery as jest.Mock).mockImplementation(({ queryKey }: QueryOptions) => {
+    if (queryKey?.[0] === 'team_query' && queryKey?.[1] === '3') {
+      return { data: mockTeam };
+    } else if (queryKey?.[0] === 'current_season') {
+      return { data: { seasonId: '20222023' } };
+    } else if (queryKey?.[0] === 'player_query' && queryKey?.[1] === '123') {
+      return { data: mockPlayer };
     }
-    return [jest.fn(), {}];
+    return {};
   });
 
   await render(<PlayerProfile />);
 
-  expect(fetchPlayer).toHaveBeenCalledTimes(1);
-  expect(fetchTeam).toHaveBeenCalledTimes(1);
-  expect(fetchTeam).toHaveBeenCalledWith(expect.objectContaining({ teamId: 22 }));
-  expect(fetchSeason).toHaveBeenCalledTimes(1);
-});
-
-it('renders all player data', async () => {
-  (useParams as jest.Mock).mockReturnValue({ id: '123' });
-  const fetchTeam = jest.fn();
-  const fetchSeason = jest.fn();
-  const fetchPlayer = jest.fn();
-  (useNetwork as jest.Mock).mockImplementation((key) => {
-    if (key === 'teams_request') {
-      return [fetchTeam, { data: { teams: [{ name: 'Team_Name' }] } }];
-    } else if (key === 'seasons_request') {
-      return [fetchSeason, { data: { seasons: [{ seasonId: '20222023' }] } }];
-    } else if (key === 'players_request') {
-      return [fetchPlayer, { data: { people: [mockPlayer] } }];
-    }
-    return [jest.fn(), {}];
+  await waitFor(() => {
+    expect(screen.queryByText(mockTeam.name)).toBeInTheDocument();
+    expect(screen.queryByText(mockPlayer.currentAge)).toBeInTheDocument();
+    expect(screen.queryByText(mockPlayer.fullName)).toBeInTheDocument();
+    expect(screen.queryByText(mockPlayer.height)).toBeInTheDocument();
+    expect(screen.queryByText(mockPlayer.nationality)).toBeInTheDocument();
+    expect(screen.queryByText(mockPlayer.primaryNumber)).toBeInTheDocument();
+    expect(screen.queryByText(mockPlayer.primaryPosition.name)).toBeInTheDocument();
+    expect(screen.queryByText(mockPlayer.shootsCatches)).toBeInTheDocument();
+    expect(screen.queryByText(mockPlayer.weight)).toBeInTheDocument();
   });
-
-  await render(<PlayerProfile />);
-
-  expect(screen.queryByText(/Team_Name/i)).toBeInTheDocument();
-  expect(screen.queryByText(mockPlayer.currentAge)).toBeInTheDocument();
-  expect(screen.queryByText(mockPlayer.fullName)).toBeInTheDocument();
-  expect(screen.queryByText(mockPlayer.height)).toBeInTheDocument();
-  expect(screen.queryByText(mockPlayer.nationality)).toBeInTheDocument();
-  expect(screen.queryByText(mockPlayer.primaryNumber)).toBeInTheDocument();
-  expect(screen.queryByText(mockPlayer.primaryPosition.name)).toBeInTheDocument();
-  expect(screen.queryByText(mockPlayer.shootsCatches)).toBeInTheDocument();
-  expect(screen.queryByText(mockPlayer.weight)).toBeInTheDocument();
 });
 
 it('raises alert if errors occur', async () => {
   const raiseAlert = jest.fn();
   (useAlert as jest.Mock).mockReturnValue(raiseAlert);
-  (useParams as jest.Mock).mockReturnValue({ id: '123' });
-  (useNetwork as jest.Mock).mockReturnValue([jest.fn(), { error: new Error() }]);
+  (useQuery as jest.Mock).mockReturnValue({ error: new Error() });
 
   await render(<PlayerProfile />);
 

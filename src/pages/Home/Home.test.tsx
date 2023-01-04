@@ -1,11 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { useQuery } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
 import Home from './Home';
-import useNetwork from '../../hooks/useNetwork';
 import useAlert from '../../hooks/useAlert';
 
+jest.mock('@tanstack/react-query');
 jest.mock('../../network/fetchTeams', () => () => null);
-jest.mock('../../hooks/useNetwork');
 jest.mock('../../hooks/useAlert');
 
 const mockTeams = [
@@ -53,19 +54,21 @@ const mockTeams = [
   },
 ];
 
-it('fetches teams on render', async () => {
-  const fetchTeams = jest.fn();
-  (useNetwork as jest.Mock).mockReturnValue([fetchTeams, { data: null }]);
+const setup = async () =>
+  render(
+    <BrowserRouter>
+      <Home />
+    </BrowserRouter>
+  );
 
-  await render(<Home />);
-
-  expect(fetchTeams).toHaveBeenCalledTimes(1);
+beforeEach(() => {
+  (useQuery as jest.Mock).mockReturnValue({});
 });
 
 it('renders all fetched teams', async () => {
-  (useNetwork as jest.Mock).mockReturnValue([jest.fn(), { data: { teams: mockTeams } }]);
+  (useQuery as jest.Mock).mockReturnValue({ data: mockTeams });
 
-  await render(<Home />);
+  await setup();
 
   // Make sure each conference and division is only rendered once even though multiple teams belong to them
   expect(await screen.findAllByText(/conference_1/i)).toHaveLength(1);
@@ -86,10 +89,9 @@ it('renders all fetched teams', async () => {
 it('raises error on network error', async () => {
   const raiseAlert = jest.fn();
   (useAlert as jest.Mock).mockReturnValue(raiseAlert);
-  const fetchTeams = jest.fn();
-  (useNetwork as jest.Mock).mockReturnValue([fetchTeams, { error: new Error() }]);
+  (useQuery as jest.Mock).mockReturnValue({ error: new Error() });
 
-  await render(<Home />);
+  await setup();
 
   expect(raiseAlert).toHaveBeenCalledTimes(1);
   expect(raiseAlert).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }));

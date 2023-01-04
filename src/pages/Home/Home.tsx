@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
-import { Box, Container, Grid, Paper, Typography, Link, Divider } from '@mui/material';
-import useNetwork from '../../hooks/useNetwork';
+import { Box, Container, Grid, Paper, Typography, Divider } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import fetchTeams from '../../network/fetchTeams';
 import { Team } from '../../types';
 import getTeamLogoUrl from '../../utils/getTeamLogoUrl';
@@ -19,7 +20,7 @@ type ConferenceMap = Record<string, Conference>;
 function TeamView({ team }: { team: Team }): React.ReactElement {
   const href = `/team/${team.id}`;
   return (
-    <Link href={href}>
+    <Link to={href}>
       <Grid container columnSpacing={2} alignItems="center">
         <Grid item>
           <Box
@@ -71,10 +72,10 @@ function ConferenceView({ conference }: { conference: Conference }): React.React
 }
 
 function Home(): React.ReactElement {
-  const [executeFetchTeams, { data: teamsData, error }] = useNetwork<Record<'teams', Team[]>>(
-    'teams_request',
-    fetchTeams
-  );
+  const { data: teams, error } = useQuery({
+    queryKey: ['teams_without_rosters'],
+    queryFn: () => fetchTeams({ withRosters: false }),
+  });
   const raiseAlert = useAlert();
 
   useEffect(() => {
@@ -83,13 +84,9 @@ function Home(): React.ReactElement {
     }
   }, [error, raiseAlert]);
 
-  useEffect(() => {
-    executeFetchTeams();
-  }, [executeFetchTeams]);
-
   const teamGrouping: ConferenceMap = useMemo(() => {
     return (
-      teamsData?.teams?.reduce<ConferenceMap>((total, curr) => {
+      teams?.reduce<ConferenceMap>((total, curr) => {
         const conferenceName = curr.conference?.name;
         const divisionName = curr.division?.name;
 
@@ -107,7 +104,7 @@ function Home(): React.ReactElement {
         return total;
       }, {}) ?? {}
     );
-  }, [teamsData]);
+  }, [teams]);
 
   return (
     <Container sx={{ paddingY: 3 }}>
